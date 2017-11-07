@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-    const $title = $("<h1>Upload an image of food and I will identify it for you!</h1>");
+    const $title = $("<h1>Upload a picture of food and I will identify it for you!</h1>");
     $title.addClass('title');
     $("#app").append($title);
 
@@ -19,9 +19,26 @@ $(document).ready(function() {
         reader.onload = function(event){
             var img = new Image();
             img.onload = function(){
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img,0,0);
+
+              const max_size = 480;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                  if (width > max_size) {
+                      height *= max_size / width;
+                      width = max_size;
+                  }
+                } else {
+                  if (height > max_size) {
+                      width *= max_size / height;
+                      height = max_size;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
             };
             img.src = event.target.result;
         };
@@ -69,7 +86,7 @@ function processEinsteinResponse(res) {
 
 function updateInfo(label, prob, lowerBound) {
   if (lowerBound && prob * 100 > lowerBound || !lowerBound) {
-    newLabel(`This is a(n) ${label} with probability ${Math.round(prob * 1000) / 10}%`);
+    newLabel(`I am ${Math.round(prob * 1000) / 10}% this is ${label} `);
   }
 }
 
