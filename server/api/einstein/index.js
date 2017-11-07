@@ -3,7 +3,7 @@ const request = require('request');
 
 const url = "https://api.einstein.ai/v2/vision/predict";
 
-
+const token = require('../../../token.js');
 
 router.get('/', (req, res, next) => {
   console.log('get request to api/einstein/');
@@ -15,7 +15,7 @@ router.post('/', (req, res, next) => {
   const imageURL = req.body.imageURL;
 
   const headers = {
-    "Authorization": "Bearer AEIDVOJCULPDA3U2IOERTBHQVSNBPZBTC46PT6PQFPQU3GSMA66G3ZQ7K6GJDOCZHFJX5KS3TYBW7KL22RY35TDNUJEMZQ4J55XZS5A",
+    "Authorization": "Bearer " + token,
     "Cache-Control": "no-cache",
     "Content-Type": "multipart/form-data"
   };
