@@ -13,9 +13,12 @@
   "dependencies": {
     "axios": "^0.16.2",
     "body-parser": "^1.17.1",
+    "episode-7": "^1.1.1",
     "express": "^4.15.2",
+    "jsonwebtoken": "^8.1.0",
     "nodemon": "^1.11.0",
     "request": "^2.83.0",
+    "request-promise": "^4.2.2",
     "volleyball": "^1.4.1"
   }
 }

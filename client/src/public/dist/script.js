@@ -1,5 +1,8 @@
 $(document).ready(function() {
-    // all custom jQuery will go here
+
+    const $title = $("<h1>Upload an image of food and I will identify it for you!</h1>");
+    $title.addClass('title');
+    $("#app").append($title);
 
     const $input = $("<input>", {"type":"file", "accept":"image/*", "id":"file-input"});
     $("#app").append($input);
@@ -11,6 +14,7 @@ $(document).ready(function() {
     const ctx = canvas.getContext('2d');
 
     function handleImage(e){
+        removeClass('label');
         var reader = new FileReader();
         reader.onload = function(event){
             var img = new Image();
@@ -21,9 +25,64 @@ $(document).ready(function() {
             };
             img.src = event.target.result;
         };
-        reader.readAsDataURL(e.target.files[0]);
+        const file = e.target.files[0];
+
+        reader.readAsDataURL(file);
+
+        const storageRef = firebase.storage().ref('hello');
+        const metadata = {
+          contentType: 'image/jpeg',
+        };
+        const uploadTask = storageRef.put(file, metadata);
+        uploadTask.on('state_changed', () => {}, () => {}, () => {
+          const downloadURL = uploadTask.snapshot.downloadURL;
+          console.log(downloadURL);
+
+          axios.post('/api/einstein/', {imageURL: downloadURL})
+            .then(res => res.data)
+            .then(res => {
+              processEinsteinResponse(res);
+            });
+        });
     }
 
     $("#file-input").change(handleImage);
-
 });
+
+function processEinsteinResponse(res) {
+  if (res.probabilities) {
+    console.log(res);
+    if (res.probabilities.some(ele => ele.probability * 100 > 10)) {
+      res.probabilities.forEach(item => {
+        const label = item.label;
+        const prob = item.probability;
+
+        updateInfo(label, prob, 10);
+      });
+    } else {
+      sadReacc();
+    }
+  } else {
+    newLabel('It appears that the image classifier is not working right now :(')
+  }
+}
+
+function updateInfo(label, prob, lowerBound) {
+  if (lowerBound && prob * 100 > lowerBound || !lowerBound) {
+    newLabel(`This is a(n) ${label} with probability ${Math.round(prob * 1000) / 10}%`);
+  }
+}
+
+function removeClass(className) {
+  $(`.${className}`).remove();
+}
+
+function sadReacc() {
+  newLabel("I'm not quite sure what this is :(</h3>");
+}
+
+function newLabel(text) {
+  const newLabel = $(`<h3>${text}</h3>`);
+  newLabel.addClass('label');
+  $('#app').append(newLabel);
+}
